@@ -1,12 +1,17 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
-import SimpleHTTPServer
-import SocketServer
+from cgi import escape
+import sys, os
+from flup.server.fcgi import WSGIServer
 
-PORT = 80
+def app(environ, start_response):
+    start_response('200 OK', [('Content-Type', 'text/html')])
 
-Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-httpd = SocketServer.TCPServer(("", PORT), Handler)
+    yield '<h1>FastCGI Environment</h1>'
+    yield '<table>'
+    for k, v in sorted(environ.items()):
+        yield '<tr><th>%s</th><td>%s</td></tr>' % (escape(k), escape(v))
+    yield '</table>'
 
-print "serving at port", PORT
-httpd.serve_forever()
+WSGIServer(app).run()
